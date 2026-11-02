@@ -1,0 +1,57 @@
+scenario,structure,n,ns_per_op
+stack,ArrayStack,1000,656.3
+stack,LinkedStack,1000,307.4
+queue,ArrayQueue (circular),1000,391.4
+queue,LinkedQueue,1000,389.8
+queue,ShiftingArrayQueue,1000,18653.1
+front_insert,DynamicArray,1000,38651.9
+random_access,DynamicArray,1000,442.1
+front_insert,SinglyLinkedList,1000,387.1
+random_access,SinglyLinkedList,1000,12766.8
+stack,ArrayStack,2000,618.9
+stack,LinkedStack,2000,315.3
+queue,ArrayQueue (circular),2000,403.9
+queue,LinkedQueue,2000,334.1
+queue,ShiftingArrayQueue,2000,37856.1
+front_insert,DynamicArray,2000,85016.6
+random_access,DynamicArray,2000,235.5
+front_insert,SinglyLinkedList,2000,416.9
+random_access,SinglyLinkedList,2000,30864.7
+stack,ArrayStack,4000,668.2
+stack,LinkedStack,4000,315.6
+queue,ArrayQueue (circular),4000,526.4
+queue,LinkedQueue,4000,446.0
+queue,ShiftingArrayQueue,4000,78092.2
+front_insert,DynamicArray,4000,152131.2
+random_access,DynamicArray,4000,220.1
+front_insert,SinglyLinkedList,4000,510.2
+random_access,SinglyLinkedList,4000,54955.8
+stack,ArrayStack,8000,631.5
+stack,LinkedStack,8000,314.1
+queue,ArrayQueue (circular),8000,409.6
+queue,LinkedQueue,8000,339.3
+queue,ShiftingArrayQueue,8000,154923.1
+front_insert,DynamicArray,8000,306385.0
+random_access,DynamicArray,8000,212.5
+front_insert,SinglyLinkedList,8000,529.4
+random_access,SinglyLinkedList,8000,112723.9
+stack,ArrayStack,16000,663.9
+stack,LinkedStack,16000,339.0
+queue,ArrayQueue (circular),16000,397.7
+queue,LinkedQueue,16000,365.2
+queue,ShiftingArrayQueue,16000,306147.7
+front_insert,DynamicArray,16000,615909.8
+random_access,DynamicArray,16000,222.1
+front_insert,SinglyLinkedList,16000,472.4
+random_access,SinglyLinkedList,16000,238026.8
+stack,ArrayStack,32000,635.0
+stack,LinkedStack,32000,308.7
+queue,ArrayQueue (circular),32000,384.6
+queue,LinkedQueue,32000,341.4
+queue,ShiftingArrayQueue,32000,619409.1
+front_insert,DynamicArray,32000,1269993.0
+random_access,DynamicArray,32000,229.6
+front_insert,SinglyLinkedList,32000,505.3
+random_access,SinglyLinkedList,32000,450915.0
+memory_bytes_per_elem,DynamicArray,100000,38.4
+memory_bytes_per_elem,SinglyLinkedList,100000,75.9
