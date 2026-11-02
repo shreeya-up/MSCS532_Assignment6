@@ -64,29 +64,29 @@ class DynamicArray:
     def append(self, value):
         if self._n == self._cap:
             self._resize(2 * self._cap)          # doubling => amortized O(1)
-        self._data[self._n] = value
+        self._data[self._n] = value                # place the new value at the end of the array
         self._n += 1
 
     def insert(self, i, value):
         if not 0 <= i <= self._n:
             raise IndexError(f"insert position {i} out of range")
         if self._n == self._cap:
-            self._resize(2 * self._cap)
+            self._resize(2 * self._cap)         # ensure there is enough space for the new element
         for j in range(self._n, i, -1):          # shift right
             self._data[j] = self._data[j - 1]
-        self._data[i] = value
+        self._data[i] = value                   # place the new value at the specified position
         self._n += 1
 
     # deletion -------------------------------------------------------
     def delete(self, i):
         self._check(i)
         value = self._data[i]
-        for j in range(i, self._n - 1):          # shift left
-            self._data[j] = self._data[j + 1]
+        for j in range(i, self._n - 1):          
+            self._data[j] = self._data[j + 1]       # shift each element one position to the left
         self._n -= 1
         self._data[self._n] = None               # drop the reference
-        # Shrink at 1/4 full (not 1/2) so that alternating append/delete at
-        # the boundary cannot trigger a resize on every single call.
+        """Shrink at 1/4 full (not 1/2) so that alternating append/delete at
+        the boundary cannot trigger a resize on every single call."""
         if 0 < self._n <= self._cap // 4 and self._cap > 4:
             self._resize(self._cap // 2)         # shrink to save memory
         return value
@@ -100,12 +100,12 @@ class DynamicArray:
     def index(self, value):
         for i in range(self._n):
             if self._data[i] == value:
-                return i
+                return i                    # return the index of the found value
         return -1
 
     def __iter__(self):
         for i in range(self._n):
-            yield self._data[i]
+            yield self._data[i]               # yield each element in order
 
     def __repr__(self):
         return f"DynamicArray({list(self)})"
@@ -119,7 +119,7 @@ class Matrix:
         if rows < 0 or cols < 0:
             raise ValueError("dimensions must be non-negative")
         self.rows, self.cols = rows, cols
-        self._data = _block(rows * cols)
+        self._data = _block(rows * cols)       # allocate a flat block for the matrix elements
         for k in range(rows * cols):
             self._data[k] = fill        # initialize each element to the fill value
 
@@ -128,7 +128,7 @@ class Matrix:
         m = cls(len(rows), len(rows[0]) if rows else 0)
         for r, row in enumerate(rows):
             if len(row) != m.cols:
-                raise ValueError("ragged rows")
+                raise ValueError("ragged rows")         # ensure all rows have the same number of columns
             for c, v in enumerate(row):
                 m.set(r, c, v)
         return m
@@ -141,7 +141,7 @@ class Matrix:
         return r * self.cols + c
 
     def get(self, r, c):
-        return self._data[self._pos(r, c)]
+        return self._data[self._pos(r, c)]       # return the element at the specified position
 
     def set(self, r, c, v):
         self._data[self._pos(r, c)] = v
@@ -154,9 +154,9 @@ class Matrix:
         for i in range(self.rows + 1):
             for c in range(self.cols):
                 if i < r:
-                    new[i * self.cols + c] = self._data[i * self.cols + c]
+                    new[i * self.cols + c] = self._data[i * self.cols + c] # copy the existing row before the insertion point
                 elif i == r:
-                    new[i * self.cols + c] = values[c]
+                    new[i * self.cols + c] = values[c]       # insert the new row at the specified position
                 else:
                     new[i * self.cols + c] = self._data[(i - 1) * self.cols + c]
         self._data, self.rows = new, self.rows + 1
@@ -168,9 +168,9 @@ class Matrix:
         k = 0
         for i in range(self.rows):
             if i == r:
-                continue
+                continue                    # skip the row to be deleted
             for c in range(self.cols):
-                new[k] = self._data[i * self.cols + c]
+                new[k] = self._data[i * self.cols + c]  # copy the element from the original matrix to the new matrix
                 k += 1
         self._data, self.rows = new, self.rows - 1
 
@@ -182,9 +182,9 @@ class Matrix:
         for r in range(self.rows):
             for j in range(nc):
                 if j < c:
-                    new[r * nc + j] = self._data[r * self.cols + j]
+                    new[r * nc + j] = self._data[r * self.cols + j] # copy the existing column before the insertion point
                 elif j == c:
-                    new[r * nc + j] = values[r]
+                    new[r * nc + j] = values[r]       # insert the new column at the specified position
                 else:
                     new[r * nc + j] = self._data[r * self.cols + j - 1]
         self._data, self.cols = new, nc
@@ -193,12 +193,12 @@ class Matrix:
         if not 0 <= c < self.cols:
             raise IndexError("column out of range")
         nc = self.cols - 1
-        new = _block(self.rows * nc)
+        new = _block(self.rows * nc)                # allocate a flat block for the new matrix with one fewer column
         for r in range(self.rows):
             k = 0
             for j in range(self.cols):
                 if j != c:
-                    new[r * nc + k] = self._data[r * self.cols + j]
+                    new[r * nc + k] = self._data[r * self.cols + j]  # copy the element from the original matrix to the new matrix
                     k += 1
         self._data, self.cols = new, nc
 
@@ -206,25 +206,25 @@ class Matrix:
         t = Matrix(self.cols, self.rows)
         for r in range(self.rows):
             for c in range(self.cols):
-                t.set(c, r, self.get(r, c))
+                t.set(c, r, self.get(r, c)) # set the element in the transposed matrix at the swapped position
         return t
 
     def multiply(self, other):
         if self.cols != other.rows:
             raise ValueError("inner dimensions differ")
-        # Textbook triple loop: entry (i, j) is the dot product of row i of
+        # Triple loop: entry (i, j) is the dot product of row i of
         # self with column j of other. Cost O(rows * cols * other.cols).
         out = Matrix(self.rows, other.cols)
         for i in range(self.rows):
             for j in range(other.cols):
                 s = 0
                 for k in range(self.cols):
-                    s += self.get(i, k) * other.get(k, j)
+                    s += self.get(i, k) * other.get(k, j) # accumulate the product of corresponding elements from row i of self and column j of other
                 out.set(i, j, s)
         return out
 
     def to_rows(self):
-        return [[self.get(r, c) for c in range(self.cols)] for r in range(self.rows)]
+        return [[self.get(r, c) for c in range(self.cols)] for r in range(self.rows)] # convert the matrix to a list of rows
 
 
 # =========================================================================
@@ -274,13 +274,13 @@ class ArrayQueue:
         # in queue order (front first) and restart the head at index 0.
         new = _block(2 * self._cap)
         for i in range(self._n):                 # unwrap into the new block
-            new[i] = self._data[(self._head + i) % self._cap]
+            new[i] = self._data[(self._head + i) % self._cap]   # copy the element from the old block to the new block in queue order
         self._data, self._cap, self._head = new, 2 * self._cap, 0
 
     def enqueue(self, x):
         if self._n == self._cap:
             self._grow()
-        self._data[(self._head + self._n) % self._cap] = x
+        self._data[(self._head + self._n) % self._cap] = x  # place the new element at the back of the queue
         self._n += 1
 
     def dequeue(self):
@@ -370,7 +370,7 @@ class SinglyLinkedList:
         # walk the whole list to find the last node.
         node = Node(value)
         if self.tail is None:
-            self.head = self.tail = node
+            self.head = self.tail = node # if the list was empty, the new node is both the head and the tail
         else:
             self.tail.next = node
             self.tail = node
@@ -379,9 +379,9 @@ class SinglyLinkedList:
     def insert_after(self, node, value):
         """O(1) once you already hold the node."""
         new = Node(value, node.next)
-        node.next = new
+        node.next = new  # link the new node after the specified node
         if node is self.tail:
-            self.tail = new
+            self.tail = new  # update the tail if the new node is inserted at the end
         self._n += 1
         return new
 
@@ -389,9 +389,9 @@ class SinglyLinkedList:
         if not 0 <= i <= self._n:
             raise IndexError(f"insert position {i} out of range")
         if i == 0:
-            return self.insert_front(value)
+            return self.insert_front(value) # insert at the front if the index is 0
         if i == self._n:
-            return self.insert_back(value)
+            return self.insert_back(value) # insert at the back if the index is the last position
         # A singly linked node only knows its successor, so we must stop at
         # the node *before* position i and link the new node after it.
         self.insert_after(self._node_at(i - 1), value)
@@ -401,9 +401,9 @@ class SinglyLinkedList:
         if self.head is None:
             raise IndexError("delete from empty list")
         node = self.head
-        self.head = node.next
-        if self.head is None:
-            self.tail = None
+        self.head = node.next  # move the head to the next node
+        if self.head is None:  # if the list is now empty
+            self.tail = None  # clear the tail pointer
         self._n -= 1
         return node.value
 
@@ -411,9 +411,9 @@ class SinglyLinkedList:
         if not 0 <= i < self._n:
             raise IndexError(f"index {i} out of range")
         if i == 0:
-            return self.delete_front()
-        prev = self._node_at(i - 1)
-        return self._unlink_after(prev)
+            return self.delete_front()  # delete the front node if the index is 0
+        prev = self._node_at(i - 1)  # get the node before the one to delete
+        return self._unlink_after(prev)  # unlink the node after prev
 
     def delete_value(self, value):
         """Remove the first node holding value. Returns True if found."""
@@ -422,19 +422,19 @@ class SinglyLinkedList:
         if self.head.value == value:
             self.delete_front()
             return True
-        prev = self.head
-        while prev.next is not None:
-            if prev.next.value == value:
-                self._unlink_after(prev)
-                return True
+        prev = self.head  # start from the head and look for the node to delete
+        while prev.next is not None:  # iterate through the list until the last node
+            if prev.next.value == value:  
+                self._unlink_after(prev)  # unlink the node after prev
+                return True  # return True if the value was found and deleted
             prev = prev.next
-        return False
+        return False 
 
     def _unlink_after(self, prev):
         # Bypass the node after prev. Nothing else points to it, so Python's
         # garbage collector reclaims it automatically.
         node = prev.next
-        prev.next = node.next
+        prev.next = node.next # bypass the node to be deleted
         if node is self.tail:
             self.tail = prev
         self._n -= 1
@@ -444,7 +444,7 @@ class SinglyLinkedList:
     def _node_at(self, i):
         node = self.head
         for _ in range(i):
-            node = node.next
+            node = node.next # move to the next node in the list
         return node
 
     def get(self, i):
@@ -458,7 +458,7 @@ class SinglyLinkedList:
         while node is not None:
             if node.value == value:
                 return i
-            node, i = node.next, i + 1
+            node, i = node.next, i + 1 # move to the next node and increment the index
         return -1
 
     def traverse(self, visit):
@@ -577,8 +577,8 @@ class RootedTree:
     def add_child(self, parent, value):
         """Add a child as the new first child of parent: O(1)."""
         child = TreeNode(value, parent)
-        child.right_sibling = parent.left_child
-        parent.left_child = child
+        child.right_sibling = parent.left_child         # link the new child to the current first child
+        parent.left_child = child       # update the parent's first child to the new child
         self._n += 1
         return child
 
@@ -586,7 +586,7 @@ class RootedTree:
     def children(node):
         c = node.left_child
         while c is not None:
-            yield c
+            yield c         # yield the current child node
             c = c.right_sibling
 
     def remove_subtree(self, node):
@@ -595,10 +595,10 @@ class RootedTree:
             raise ValueError("cannot remove the root")
         p = node.parent
         if p.left_child is node:
-            p.left_child = node.right_sibling
+            p.left_child = node.right_sibling  # update the parent's first child to the next sibling of the node being removed
         else:
             c = p.left_child
-            while c.right_sibling is not node:
+            while c.right_sibling is not node:  # find the sibling just before the node to be removed
                 c = c.right_sibling
             c.right_sibling = node.right_sibling
         self._n -= sum(1 for _ in self._preorder(node))
@@ -627,7 +627,7 @@ class RootedTree:
         q.enqueue(self.root)
         out = []
         while not q.is_empty():
-            n = q.dequeue()
+            n = q.dequeue()     # dequeue the next node from the queue
             out.append(n.value)
             for c in self.children(n):
                 q.enqueue(c)
@@ -636,7 +636,7 @@ class RootedTree:
     def depth(self, node):
         d = 0
         while node.parent is not None:
-            node, d = node.parent, d + 1
+            node, d = node.parent, d + 1 # move up to the parent and increment the depth
         return d
 
     def height(self):
@@ -644,7 +644,7 @@ class RootedTree:
         q = ArrayQueue()
         q.enqueue((self.root, 0))
         while not q.is_empty():
-            n, d = q.dequeue()
+            n, d = q.dequeue()      # dequeue the next node and its depth from the queue
             best = max(best, d)
             for c in self.children(n):
                 q.enqueue((c, d + 1))
@@ -652,7 +652,7 @@ class RootedTree:
 
 
 # =========================================================================
-# Self-test
+# Self-test: written using AI, checked for accuracy
 # =========================================================================
 if __name__ == "__main__":
     import random
